@@ -1,4 +1,5 @@
-Site de compra e venda
+Site de venda
+
 3 telas de cadastro:
 Produto
 Fornecedor 
