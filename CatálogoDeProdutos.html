@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Garrafario</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+
+    header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .menu a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+      font-weight: bold;
+    }
+
+    .container {
+      padding: 30px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .produto {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .produto img {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 10px;
+    }
+
+    .produto h2 {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+
+    .produto p {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .produto button {
+      background-color: #27ae60;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+
+    .produto button:hover {
+      background-color: #219150;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">Garrafario</div>
+    <div class="menu">
+       <a href="carrinho.html" class="botao"> Ir para o Carrinho</a>
+  <a href="login.html" class="botao"> Fazer Login</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="produto">
+      <img src="https://m.media-amazon.com/images/I/41Fhrx7K9+L._AC_SY450_.jpg" alt="Garrafa Térmica">
+      <h2>Garrafa Térmica 500ml</h2>
+      <p>................</p>
+      <p><strong>R$ 00.00</strong></p>
+      <button>Adicionar ao Carrinho</button>
+    </div>
+
+    <div class="produto">
+      <img src="https://m.media-amazon.com/images/I/41Fhrx7K9+L._AC_SY450_.jpg" alt="Garrafa Esportiva">
+      <h2>Garrafa  750ml</h2>
+      <p>.............</p>
+      <p><strong>R$ 00,00</strong></p>
+      <button>Adicionar ao Carrinho</button>
+    </div>
+
+    <div class="produto">
+      <img src="https://m.media-amazon.com/images/I/41Fhrx7K9+L._AC_SY450_.jpg" alt="Garrafa Luxo">
+      <h2>Garrafa 1L</h2>
+      <p>...................</p>
+      <p><strong>R$ 00,00</strong></p>
+      <button>Adicionar ao Carrinho</button>
+    </div>
+  </div>
+
+</body>
+</html>
