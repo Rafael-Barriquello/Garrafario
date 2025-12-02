@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Carrinho - Garrafario</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+
+    header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .menu a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+      font-weight: bold;
+    }
+
+    .container {
+      width: 80%;
+      max-width: 800px;
+      margin: 30px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .item-carrinho {
+        border-bottom: 1px solid #eee;
+        padding: 10px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .checkout-btn {
+        margin-top: 20px;
+        padding: 15px 25px;
+        background-color: #27ae60;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 18px;
+        width: 100%;
+    }
+    .checkout-btn:hover {
+        background-color: #219150;
+    }
+  </style>
+</head>
+<body>
+    <script src="data.js"></script>
+
+  <header>
+    <div class="logo">Garrafario</div>
+    <div class="menu">
+      <a href="catalogo.html">⬅ Voltar ao Catálogo</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <h2>Seu Carrinho</h2>
+    
+    <div id="itensCarrinho">
+      </div>
+
+    <h3 id="totalCarrinho"></h3>
+    
+    <button class="checkout-btn" onclick="finalizarCompra()">Finalizar Compra</button>
+  </div>
+
+  <script>
+    
+    function carregarCarrinho() {
+        const carrinho = getCart();
+        const listaDiv = document.getElementById("itensCarrinho");
+        const totalDiv = document.getElementById("totalCarrinho");
+        listaDiv.innerHTML = "";
+        let total = 0;
+
+        if (carrinho.length === 0) {
+            listaDiv.innerHTML = "<p>Seu carrinho está vazio.</p>";
+            totalDiv.innerText = "";
+            return;
+        }
+
+        carrinho.forEach(item => {
+            const produto = getProductById(item.id);
+
+            if (produto) {
+                const subtotal = produto.preco * item.quantidade;
+                total += subtotal;
+
+                listaDiv.innerHTML += `
+                    <div class="item-carrinho">
+                        <span>${item.quantidade}x - ${produto.nome} (R$ ${produto.preco.toFixed(2)})</span>
+                        <strong>R$ ${subtotal.toFixed(2)}</strong>
+                    </div>
+                `;
+            }
+        });
+
+        totalDiv.innerText = `Total: R$ ${total.toFixed(2)}`;
+    }
+
+    function finalizarCompra() {
+        if (getCart().length === 0) {
+            alert("Seu carrinho está vazio!");
+            return;
+        }
+        
+        const usuarioLogado = JSON.parse(localStorage.getItem(LS_KEYS.LOGGED_USER));
+        
+        if (!usuarioLogado || usuarioLogado.tipo !== 'cliente') {
+            alert("Faça login como cliente para finalizar a compra.");
+            window.location.href = 'paginaLogin.html';
+            return;
+        }
+
+        alert(`Compra finalizada com sucesso! Total: ${document.getElementById("totalCarrinho").innerText}`);
+        clearCart();
+        carregarCarrinho();
+    }
+    
+    carregarCarrinho();
+    
+  </script>
+
+</body>
+</html>
