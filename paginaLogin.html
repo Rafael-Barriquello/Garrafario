@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Garrafario</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #ecf0f1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .voltar {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 30px;
+      text-decoration: none;
+      color: #2c3e50;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .voltar:hover {
+      color: #1a252f;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      width: 350px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #27ae60;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #219150;
+    }
+
+    .link {
+      margin-top: 15px;
+      display: block;
+      color: #2980b9;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .hidden {
+      display: none;
+    }
+    
+    #erroLogin {
+        color: red; 
+        margin-top: 10px; 
+        font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+    
+  <script src="data.js"></script>
+
+  <a href="catalogo.html" class="voltar">←</a>
+
+  <div class="container">
+
+    <div id="loginBox">
+      <h2>Entrar</h2>
+
+      <input type="email" id="loginEmail" placeholder="Email">
+      <input type="password" id="loginSenha" placeholder="Senha">
+
+      <button onclick="fazerLogin()">Entrar</button>
+      <div id="erroLogin"></div>
+      <span class="link" onclick="mostrarCadastro()">Criar uma conta</span>
+
+    </div>
+
+    <div id="cadastroBox" class="hidden">
+      <h2>Criar Conta</h2>
+
+      <input type="text" id="cadNome" placeholder="Nome completo">
+      <input type="email" id="cadEmail" placeholder="Email">
+      <input type="password" id="cadSenha" placeholder="Senha">
+
+      <select id="cadTipo">
+        <option value="" disabled selected>Selecione o tipo</option>
+        <option value="cliente">Cliente</option>
+        <option value="fornecedor">Fornecedor</option>
+      </select>
+
+      <button onclick="criarConta()">Cadastrar</button>
+      <span class="link" onclick="mostrarLogin()">Voltar ao login</span>
+      <div id="erroCadastro" style="color: red; margin-top: 10px; font-size: 14px;"></div>
+    </div>
+
+  </div>
+
+  <script>
+
+    function mostrarCadastro() {
+      document.getElementById("loginBox").classList.add("hidden");
+      document.getElementById("cadastroBox").classList.remove("hidden");
+      document.getElementById("erroCadastro").innerText = "";
+    }
+
+    function mostrarLogin() {
+      document.getElementById("cadastroBox").classList.add("hidden");
+      document.getElementById("loginBox").classList.remove("hidden");
+      document.getElementById("erroLogin").innerText = "";
+    }
+
+    // Criar conta (Refatorado para localStorage)
+    function criarConta() {
+      const nome = document.getElementById("cadNome").value;
+      const email = document.getElementById("cadEmail").value;
+      const senha = document.getElementById("cadSenha").value;
+      const tipo = document.getElementById("cadTipo").value;
+      const erro = document.getElementById("erroCadastro");
+
+      if (!nome || !email || !senha || !tipo) {
+        erro.innerText = "Preencha todos os campos!";
+        return;
+      }
+      
+      if (!isEmailUnique(email)) {
+          erro.innerText = "Este email já está cadastrado.";
+          return;
+      }
+
+      const novoUsuario = saveUser({ nome, email, senha, tipo });
+      
+      erro.innerText = "";
+      alert("Conta criada com sucesso! Você será redirecionado(a).");
+      
+      localStorage.setItem(LS_KEYS.LOGGED_USER, JSON.stringify(novoUsuario)); 
+
+      if (novoUsuario.tipo === "fornecedor") {
+        window.location.href = `fornecedor.html`; // Não precisa de ID na URL, o fornecedor.html pega do LS
+      } else {
+        window.location.href = "catalogo.html";
+      }
+    }
+
+   // Fazer login (Refatorado para localStorage)
+    function fazerLogin() {
+      const erro = document.getElementById("erroLogin");
+      erro.innerText = ""; 
+
+      const email = document.getElementById("loginEmail").value;
+      const senha = document.getElementById("loginSenha").value;
+
+      if (!email || !senha) {
+        erro.innerText = "Preencha todos os campos.";
+        return;
+      }
+
+      const dados = findUser(email, senha);
+
+      if (!dados) {
+        erro.innerText = "Email ou senha incorretos.";
+        return;
+      }
+
+      // Login OK
+      localStorage.setItem(LS_KEYS.LOGGED_USER, JSON.stringify(dados));
+
+      if (dados.tipo === "cliente") {
+        window.location.href = "catalogo.html";
+      } else {
+        // Redireciona para o painel do fornecedor
+        window.location.href = `fornecedor.html`;
+      }
+    }
+
+</script>
+
+
+</body>
+</html>

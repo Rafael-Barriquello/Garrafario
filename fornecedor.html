@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Painel do Fornecedor - Garrafario</title>
+
+<style>
+    /* ... Estilos CSS ... (Mantidos) */
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+    }
+
+    header {
+        background-color: #2c3e50;
+        color: white;
+        padding: 15px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logo {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .menu a {
+        color: white;
+        text-decoration: none;
+        margin-left: 20px;
+        font-weight: bold;
+    }
+
+    .container {
+        width: 90%;
+        max-width: 900px;
+        margin: auto;
+        padding: 20px;
+    }
+
+    h2 {
+        color: #333;
+    }
+
+    .form-box {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+
+    input, textarea {
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 5px;
+        border: 1px solid #aaa;
+    }
+
+    button {
+        margin-top: 10px;
+        padding: 10px 15px;
+        background-color: #27ae60;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #219150;
+    }
+
+    .produto-item {
+        background:white;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .produto-info {
+        width: 70%;
+    }
+
+    .produto-info h3 {
+        margin: 0;
+    }
+
+    .produto-img {
+        width: 90px;
+        height: 90px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+
+    .delete-btn {
+        background-color: #c0392b;
+    }
+
+    .delete-btn:hover {
+        background-color: #a33025;
+    }
+</style>
+</head>
+
+<body>
+    <script src="data.js"></script>
+
+<header>
+    <div class="logo">Garrafario - Fornecedor</div>
+    <div class="menu">
+        <a href="catalogo.html">⬅ Voltar ao Catálogo</a>
+    </div>
+</header>
+
+<div class="container">
+
+    <h2>Cadastrar Novo Produto</h2>
+
+    <div class="form-box">
+        <input type="text" id="nome" placeholder="Nome do Produto">
+        <textarea id="descricao" rows="3" placeholder="Descrição"></textarea>
+        <input type="number" id="preco" placeholder="Preço (Ex: 49.90)">
+        <input type="text" id="imagem" placeholder="URL da Imagem">
+
+        <button onclick="cadastrarProduto()">Cadastrar Produto</button>
+    </div>
+
+    <h2>Seus Produtos Cadastrados</h2>
+    <div id="lista-produtos"></div>
+
+</div>
+
+<script>
+    let fornecedorID;
+    
+    // --- Lógica de Segurança (Refatorada) ---
+    const usuarioLogado = JSON.parse(localStorage.getItem(LS_KEYS.LOGGED_USER));
+    
+    if (!usuarioLogado || usuarioLogado.tipo !== "fornecedor") {
+        alert("Acesso negado! Faça login novamente como fornecedor.");
+        window.location.href = "paginaLogin.html";
+        throw new Error("Usuário não autenticado ou não é fornecedor."); 
+    }
+    
+    fornecedorID = usuarioLogado.id;
+
+
+    // --- Funções de Produto (Refatoradas para data.js) ---
+
+    function carregarProdutos() {
+        // Usa getProductsByFornecedor(fornecedorID) do data.js
+        const produtos = getProductsByFornecedor(fornecedorID); 
+
+        const lista = document.getElementById("lista-produtos");
+        lista.innerHTML = "";
+
+        produtos.forEach(p => {
+            lista.innerHTML += `
+                <div class="produto-item">
+                    <div class="produto-info">
+                        <h3>${p.nome}</h3>
+                        <p>${p.descricao}</p>
+                        <p><strong>R$ ${p.preco.toFixed(2)}</strong></p>
+                    </div>
+
+                    <img src="${p.imagem}" class="produto-img">
+                    
+                    <button class="delete-btn" onclick="deletarProduto(${p.id})">Excluir</button>
+                </div>
+            `;
+        });
+    }
+
+    function cadastrarProduto() {
+        const nome = document.getElementById("nome").value;
+        const descricao = document.getElementById("descricao").value;
+        const preco = document.getElementById("preco").value;
+        const imagem = document.getElementById("imagem").value;
+
+        if (!nome || !preco || !imagem) {
+             alert("Preencha todos os campos obrigatórios (Nome, Preço e Imagem).");
+             return;
+        }
+
+        const produto = {
+            nome: nome,
+            descricao: descricao,
+            preco: preco,
+            imagem: imagem,
+            fornecedor_id: fornecedorID
+        };
+
+        // Usa saveProduct(produto) do data.js
+        saveProduct(produto);
+
+        // Limpa os campos após o cadastro
+        document.getElementById("nome").value = "";
+        document.getElementById("descricao").value = "";
+        document.getElementById("preco").value = "";
+        document.getElementById("imagem").value = "";
+
+        alert("Produto cadastrado!");
+        carregarProdutos();
+    }
+
+    function deletarProduto(id) {
+        if (!confirm("Tem certeza que deseja excluir este produto?")) return;
+
+        // Usa deleteProduct(id) do data.js
+        deleteProduct(id);
+        carregarProdutos();
+    }
+
+    carregarProdutos();
+</script>
+
+</body>
+</html>
