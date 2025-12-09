@@ -2,7 +2,6 @@
 
 O **Garrafario** é uma aplicação web de e-commerce que conecta fornecedores de garrafas a clientes finais. O sistema simula um ambiente completo de marketplace, permitindo cadastro de usuários com diferentes perfis (Cliente e Fornecedor), gestão de catálogo e simulação de compras.
 
-> **Status:**  Em desenvolvimento (Funcional)
 
 ##  Funcionalidades
 
