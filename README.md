@@ -44,4 +44,4 @@ O sistema possui controle de sessão e funcionalidades específicas para cada ti
 
 1. **Clone este repositório:**
    ```bash
-   git clone [https://github.com/SEU-USUARIO/Garrafario.git](https://github.com/SEU-USUARIO/Garrafario.git)
+   git clone ...
