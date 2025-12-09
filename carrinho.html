@@ -119,9 +119,11 @@
 
         totalDiv.innerText = `Total: R$ ${total.toFixed(2)}`;
     }
-
+// mudanças adicionadas por Mirian 
     function finalizarCompra() {
-        if (getCart().length === 0) {
+        const carrinho = getCart();
+
+        if (carrinho.length === 0) {
             alert("Seu carrinho está vazio!");
             return;
         }
@@ -134,7 +136,12 @@
             return;
         }
 
-        alert(`Compra finalizada com sucesso! Total: ${document.getElementById("totalCarrinho").innerText}`);
+        const cliente = new ClientePerfil(usuarioLogado.id);
+        const totalTexto = document.getElementById("totalCarrinho").innerText;
+
+        cliente.realizarCompra(carrinho, totalTexto);
+
+        alert(`Compra finalizada! O pedido foi salvo no histórico.`);
         clearCart();
         carregarCarrinho();
     }

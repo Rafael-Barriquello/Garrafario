@@ -139,25 +139,16 @@
 </div>
 
 <script>
-    let fornecedorID;
-    
-    // --- Lógica de Segurança (Refatorada) ---
     const usuarioLogado = JSON.parse(localStorage.getItem(LS_KEYS.LOGGED_USER));
-    
     if (!usuarioLogado || usuarioLogado.tipo !== "fornecedor") {
-        alert("Acesso negado! Faça login novamente como fornecedor.");
+        alert("Acesso negado!");
         window.location.href = "paginaLogin.html";
-        throw new Error("Usuário não autenticado ou não é fornecedor."); 
     }
-    
-    fornecedorID = usuarioLogado.id;
 
-
-    // --- Funções de Produto (Refatoradas para data.js) ---
+    const fornecedor = new FornecedorPerfil(usuarioLogado.id);
 
     function carregarProdutos() {
-        // Usa getProductsByFornecedor(fornecedorID) do data.js
-        const produtos = getProductsByFornecedor(fornecedorID); 
+        const produtos = fornecedor.listarMeusProdutos(); 
 
         const lista = document.getElementById("lista-produtos");
         lista.innerHTML = "";
@@ -168,11 +159,9 @@
                     <div class="produto-info">
                         <h3>${p.nome}</h3>
                         <p>${p.descricao}</p>
-                        <p><strong>R$ ${p.preco.toFixed(2)}</strong></p>
+                        <p><strong>R$ ${Number(p.preco).toFixed(2)}</strong></p>
                     </div>
-
                     <img src="${p.imagem}" class="produto-img">
-                    
                     <button class="delete-btn" onclick="deletarProduto(${p.id})">Excluir</button>
                 </div>
             `;
@@ -186,22 +175,12 @@
         const imagem = document.getElementById("imagem").value;
 
         if (!nome || !preco || !imagem) {
-             alert("Preencha todos os campos obrigatórios (Nome, Preço e Imagem).");
+             alert("Preencha os campos obrigatórios.");
              return;
         }
 
-        const produto = {
-            nome: nome,
-            descricao: descricao,
-            preco: preco,
-            imagem: imagem,
-            fornecedor_id: fornecedorID
-        };
+        fornecedor.adicionarProduto(nome, descricao, preco, imagem);
 
-        // Usa saveProduct(produto) do data.js
-        saveProduct(produto);
-
-        // Limpa os campos após o cadastro
         document.getElementById("nome").value = "";
         document.getElementById("descricao").value = "";
         document.getElementById("preco").value = "";
@@ -212,11 +191,14 @@
     }
 
     function deletarProduto(id) {
-        if (!confirm("Tem certeza que deseja excluir este produto?")) return;
+        if (!confirm("Tem certeza?")) return;
 
-        // Usa deleteProduct(id) do data.js
-        deleteProduct(id);
-        carregarProdutos();
+        try {
+            fornecedor.deletarProdutoSeguro(id);
+            carregarProdutos();
+        } catch (erro) {
+            alert(erro.message);
+        }
     }
 
     carregarProdutos();

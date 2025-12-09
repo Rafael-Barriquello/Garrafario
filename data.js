@@ -118,3 +118,65 @@ function saveCart(cart) {
 function clearCart() {
     localStorage.removeItem(LS_KEYS.CART);
 }
+
+// Mudanças adicionas por Mirian
+class ClientePerfil {
+    constructor(userId) {
+        this.id = userId;
+    }
+
+    realizarCompra(carrinho, totalTexto) {
+        if (!localStorage.getItem('LSDATA_ORDERS')) {
+            localStorage.setItem('LSDATA_ORDERS', JSON.stringify([]));
+        }
+
+        const pedidos = JSON.parse(localStorage.getItem('LSDATA_ORDERS')) || [];
+        
+        const novoPedido = {
+            id: Date.now(),
+            clienteId: this.id,
+            itens: carrinho,
+            total: totalTexto,
+            data: new Date().toLocaleDateString('pt-BR')
+        };
+
+        pedidos.push(novoPedido);
+        localStorage.setItem('LSDATA_ORDERS', JSON.stringify(pedidos));
+        console.log("Pedido salvo:", novoPedido);
+    }
+}
+
+class FornecedorPerfil {
+    constructor(userId) {
+        this.id = userId;
+    }
+
+    adicionarProduto(nome, descricao, preco, imagem) {
+        const produto = {
+            nome: nome,
+            descricao: descricao,
+            preco: Number(preco),
+            imagem: imagem,
+            fornecedor_id: this.id
+        };
+        return saveProduct(produto); 
+    }
+
+    deletarProdutoSeguro(produtoId) {
+        const produto = getProductById(produtoId);
+
+        if (!produto) {
+            throw new Error("Produto não encontrado.");
+        }
+
+        if (produto.fornecedor_id !== this.id) {
+            throw new Error("PROIBIDO: Você não pode apagar o produto de outro fornecedor.");
+        }
+
+        return deleteProduct(produtoId);
+    }
+    
+    listarMeusProdutos() {
+        return getProductsByFornecedor(this.id);
+    }
+}
