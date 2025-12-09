@@ -4,13 +4,6 @@ O **Garrafario** é uma aplicação web de e-commerce que conecta fornecedores d
 
 > **Status:**  Em desenvolvimento (Funcional)
 
-## 🌐 Demonstração Online
-Acesse o projeto rodando diretamente pelo navegador:
-🔗 **[Clique aqui para acessar o Garrafario](https://SEU-USUARIO.github.io/Garrafario/paginaLogin.html)**
-*(Substitua "SEU-USUARIO" pelo seu nome de usuário do GitHub no link acima)*
-
----
-
 ##  Funcionalidades
 
 O sistema possui controle de sessão e funcionalidades específicas para cada tipo de usuário:
