@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Meus Pedidos - Garrafario</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+
+    header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .menu a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+      font-weight: bold;
+    }
+
+    .container {
+      width: 80%;
+      max-width: 800px;
+      margin: 30px auto;
+    }
+
+    .pedido-card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      border-left: 5px solid #27ae60;
+    }
+
+    .pedido-header {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+    }
+
+    .pedido-data {
+        color: #7f8c8d;
+        font-size: 0.9em;
+    }
+
+    .pedido-total {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+
+    .lista-itens {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .lista-itens li {
+        padding: 5px 0;
+        display: flex;
+        justify-content: space-between;
+        color: #555;
+    }
+    
+    .status {
+        display: inline-block;
+        background-color: #e8f5e9;
+        color: #27ae60;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <script src="data.js"></script>
+  <script src="cliente_perfil.js"></script>
+
+  <header>
+    <div class="logo">Garrafario</div>
+    <div class="menu">
+      <a href="catalogo.html">⬅ Voltar ao Catálogo</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <h2>Histórico de Compras</h2>
+    <div id="listaHistorico">
+        </div>
+  </div>
+
+  <script>
+    function carregarHistorico() {
+        const divHistorico = document.getElementById("listaHistorico");
+        const usuarioLogado = JSON.parse(localStorage.getItem(LS_KEYS.LOGGED_USER));
+
+        // 1. Verificar se está logado
+        if (!usuarioLogado || usuarioLogado.tipo !== 'cliente') {
+            divHistorico.innerHTML = "<p>Por favor, faça login como cliente para ver seus pedidos.</p>";
+            return;
+        }
+
+        // 2. Instanciar a classe e buscar dados
+        try {
+            const cliente = new ClientePerfil(usuarioLogado.id);
+            const pedidos = cliente.getHistoricoCompras();
+
+            if (pedidos.length === 0) {
+                divHistorico.innerHTML = "<p>Você ainda não realizou nenhuma compra.</p>";
+                return;
+            }
+
+            // 3. Renderizar cada pedido
+            divHistorico.innerHTML = ""; 
+            
+            pedidos.forEach(pedido => {
+                // Formatar data (ex: 10/12/2025 às 14:30)
+                const dataObj = new Date(pedido.data);
+                const dataFormatada = dataObj.toLocaleDateString('pt-BR') + ' às ' + dataObj.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+
+                // Montar lista de itens HTML
+                let itensHtml = '';
+                pedido.itens.forEach(item => {
+                    // Busca nome do produto pelo ID para garantir que mostre o nome certo
+                    const prodInfo = getProductById(item.id); 
+                    const nomeProduto = prodInfo ? prodInfo.nome : "Produto Indisponível";
+                    
+                    itensHtml += `
+                        <li>
+                            <span>${item.quantidade}x ${nomeProduto}</span>
+                        </li>
+                    `;
+                });
+
+                // Criar o card do pedido
+                const card = `
+                    <div class="pedido-card">
+                        <div class="pedido-header">
+                            <div>
+                                <div class="pedido-data">Pedido #${pedido.id} • ${dataFormatada}</div>
+                                <div style="margin-top:5px;"><span class="status">${pedido.status}</span></div>
+                            </div>
+                            <div class="pedido-total">${pedido.total}</div>
+                        </div>
+                        <ul class="lista-itens">
+                            ${itensHtml}
+                        </ul>
+                    </div>
+                `;
+                divHistorico.innerHTML += card;
+            });
+
+        } catch (erro) {
+            console.error(erro);
+            divHistorico.innerHTML = "<p>Erro ao carregar perfil. Tente fazer login novamente.</p>";
+        }
+    }
+
+    // Carregar ao abrir a página
+    carregarHistorico();
+  </script>
+
+</body>
+</html>
