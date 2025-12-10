@@ -40,8 +40,3 @@ O sistema possui controle de sessão e funcionalidades específicas para cada ti
 
 ---
 
-##  Como Rodar Localmente
-
-1. **Clone este repositório:**
-   ```bash
-   git clone ...
