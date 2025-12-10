@@ -14,7 +14,7 @@ class ClientePerfil {
 
     getInformacoes() {
         return this.dados;
-    }
+    } 
 
     atualizarCadastro(novoNome, novoEmail, novaSenha) {
         let users = JSON.parse(localStorage.getItem(LS_KEYS.USERS));
