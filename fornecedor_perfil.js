@@ -7,7 +7,7 @@ class FornecedorPerfil {
             throw new Error("Usuário inválido ou não é um fornecedor.");
         }
     }
-
+    
     getInformacoes() {
         return this.dados;
     }
