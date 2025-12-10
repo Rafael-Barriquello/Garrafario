@@ -84,7 +84,7 @@
 
     <h3 id="totalCarrinho"></h3>
     
-    <button class="checkout-btn" onclick="finalizarCompra()">Finalizar Compra</button>
+    <button id="btnAcao" class="checkout-btn" onclick="finalizarCompra()">Finalizar Compra</button>
   </div>
 
   <script>
@@ -93,14 +93,24 @@
         const carrinho = getCart();
         const listaDiv = document.getElementById("itensCarrinho");
         const totalDiv = document.getElementById("totalCarrinho");
+        const btnAcao = document.getElementById("btnAcao");
+
         listaDiv.innerHTML = "";
         let total = 0;
-
+        // verificar se esta vazio
         if (carrinho.length === 0) {
-            listaDiv.innerHTML = "<p>Seu carrinho está vazio.</p>";
+            listaDiv.innerHTML = "<p style='padding: 20px; text-align:center;'>Seu carrinho está vazio.</p>";
             totalDiv.innerText = "";
+            // muda o botao
+            btnAcao.innerText = "Escolher Produto";
+            btnAcao.onclick = function() { window.location.href = "catalogo.html"; };
+            btnAcao.style.backgroundColor = "#3498db"; // cor azul pra destacar
             return;
         }
+        // tem itens
+        btnAcao.innerText = "Finalizar Compra";
+        btnAcao.onclick = finalizarCompra;
+        btnAcao.style.backgroundColor = "#27ae60"; // Cor verde pra dizer q deu certo
 
         carrinho.forEach(item => {
             const produto = getProductById(item.id);
@@ -117,10 +127,9 @@
                 `;
             }
         });
-
         totalDiv.innerText = `Total: R$ ${total.toFixed(2)}`;
     }
-// mudanças adicionadas por Mirian 
+
     function finalizarCompra() {
         const carrinho = getCart();
 
