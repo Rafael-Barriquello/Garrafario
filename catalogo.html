@@ -84,17 +84,44 @@
   <header>
     <div class="logo">Garrafario</div>
     <div class="menu">
-      <a href="historico.html" class="botao">📄 Meus Pedidos</a> 
-      <a href="carrinho.html" class="botao">🛒 Ir para o Carrinho</a>
-      <a href="paginaLogin.html" class="botao">👤 Fazer Login</a>
-      <a href="#" class="botao" onclick="logout()">🚪 Sair</a>
-</div>
-  </header>
+      <a href="historico.html" class="botao" id="btnMeusPedidos" style="display: none;">📄 Meus Pedidos</a>
+      <a href="carrinho.html" class="botao">🛒 Carrinho</a>
+      <a href="paginaLogin.html" class="botao" id="btnLogin">👤 Fazer Login</a>
+      <span id="msgOla" style="color: white; font-weight: bold; margin-left: 15px; display: none;"></span>
+      <a href="#" class="botao" onclick="logout()" id="btnSair" style="display: none;">🚪 Sair</a>
+    </div>
+</header>
 
   <div class="container" id="listaProdutos">
     </div>
 
-  <script>
+  <script> 
+    function atualizarMenu() { // atualiza o menu se a pessoa ta logada ou não
+      const usuarioLogado = JSON.parse(localStorage.getItem(LS_KEYS.LOGGED_USER));
+      const btnLogin = document.getElementById("btnLogin");
+      const btnSair = document.getElementById("btnSair");
+      const btnMeusPedidos = document.getElementById("btnMeusPedidos");
+      const msgOla = document.getElementById("msgOla");
+
+      if (usuarioLogado) {//se estiver logado
+        btnLogin.style.display = "none"; // Esconde Fazer Login
+        btnSair.style.display = "inline-block"; // Mostra Sair
+        btnMeusPedidos.style.display = "inline-block"; // Mostra Meus Pedidos
+        
+        // Mostra o nome do usuário
+        msgOla.innerText = `Olá, ${usuarioLogado.nome}`; 
+        msgOla.style.display = "inline-block";
+        
+      } else { //se não
+        btnLogin.style.display = "inline-block"; // Mostra Fazer Login
+        
+        btnSair.style.display = "none"; // Esconde Sair
+        btnMeusPedidos.style.display = "none"; // Esconde Meus Pedidos
+        msgOla.style.display = "none"; // Esconde o nome
+      }
+    }
+    atualizarMenu();
+
     // Carregar produtos (Refatorado para data.js)
     function carregarProdutos() {
       // Usa getProducts() do data.js
