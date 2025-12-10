@@ -16,7 +16,7 @@ class FornecedorPerfil {
         return getProductsByFornecedor(this.dados.id);
     }
 
-    publicarProduto(nome, descricao, preco, imagemUrl) {
+    adicinarProduto(nome, descricao, preco, imagemUrl) {
         const novoProduto = {
             nome: nome,
             descricao: descricao,

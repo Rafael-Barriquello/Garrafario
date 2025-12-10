@@ -81,19 +81,60 @@
 <body>
     <script src="data.js"></script>
 
-  <header>
+<header>
     <div class="logo">Garrafario</div>
     <div class="menu">
-      <a href="carrinho.html" class="botao"> Ir para o Carrinho</a>
-      <a href="paginaLogin.html" class="botao"> Fazer Login</a>
-      <a href="#" class="botao" onclick="logout()"> Sair</a>
+      <a href="historico.html" class="botao" id="btnMeusPedidos" style="display: none;">📄 Meus Pedidos</a>
+      <a href="carrinho.html" class="botao" id="btnCarrinho">🛒 Carrinho</a>
+      <a href="fornecedor.html" class="botao" id="btnMeusProdutos" style="display: none;">📦 Meus Produtos</a>
+      <a href="paginaLogin.html" class="botao" id="btnLogin">👤 Fazer Login</a>
+      <span id="msgOla" style="color: white; font-weight: bold; margin-left: 15px; display: none;"></span>
+      <a href="#" class="botao" onclick="logout()" id="btnSair" style="display: none;">🚪 Sair</a>
     </div>
   </header>
 
   <div class="container" id="listaProdutos">
     </div>
 
-  <script>
+  <script> 
+    function atualizarMenu() {
+      const usuarioLogado = JSON.parse(localStorage.getItem(LS_KEYS.LOGGED_USER));
+      const btnLogin = document.getElementById("btnLogin");
+      const btnSair = document.getElementById("btnSair");
+      const msgOla = document.getElementById("msgOla");
+      // Botões específicos
+      const btnMeusPedidos = document.getElementById("btnMeusPedidos");
+      const btnCarrinho = document.getElementById("btnCarrinho");
+      const btnMeusProdutos = document.getElementById("btnMeusProdutos");
+
+      if (usuarioLogado) { //LOGADO
+        btnLogin.style.display = "none";       // Esconde login
+        btnSair.style.display = "inline-block"; // Mostra Sair
+        msgOla.innerText = `Olá, ${usuarioLogado.nome} (${usuarioLogado.tipo})`; 
+        msgOla.style.display = "inline-block";
+        if (usuarioLogado.tipo === 'fornecedor') {//verificar fornecedor ou cliente?
+            //Fornecedor:
+            btnMeusProdutos.style.display = "inline-block"; 
+            btnCarrinho.style.display = "none";    // Esconde carrinho
+            btnMeusPedidos.style.display = "none"; // Esconde pedidos
+        } else {
+            //Cliente
+            btnMeusProdutos.style.display = "none"; // Esconde produtos
+            btnCarrinho.style.display = "inline-block"; // Mostra carrinho
+            btnMeusPedidos.style.display = "inline-block"; // Mostra pedidos
+        }
+
+      } else {//NÃO logado
+        btnLogin.style.display = "inline-block";
+        btnCarrinho.style.display = "inline-block"; // Visitante pode ver o carrinho
+        btnSair.style.display = "none";
+        msgOla.style.display = "none";
+        btnMeusPedidos.style.display = "none";
+        btnMeusProdutos.style.display = "none";
+      }
+    }
+    atualizarMenu();
+
     // Carregar produtos (Refatorado para data.js)
     function carregarProdutos() {
       // Usa getProducts() do data.js
