@@ -166,7 +166,7 @@
       localStorage.setItem(LS_KEYS.LOGGED_USER, JSON.stringify(novoUsuario)); 
 
       if (novoUsuario.tipo === "fornecedor") {
-        window.location.href = `fornecedor.html`; // Não precisa de ID na URL, o fornecedor.html pega do LS
+        window.location.href = `perfilFornecedor.html`; // Não precisa de ID na URL, o fornecedor.html pega do LS
       } else {
         window.location.href = "catalogo.html";
       }
@@ -199,7 +199,7 @@
         window.location.href = "catalogo.html";
       } else {
         // Redireciona para o painel do fornecedor
-        window.location.href = `fornecedor.html`;
+        window.location.href = `perfilFornecedor.html`;
       }
     }
 

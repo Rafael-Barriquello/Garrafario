@@ -76,6 +76,18 @@
     .produto button:hover {
       background-color: #219150;
     }
+
+    /* Estilo da mensagem de "sem produtos" */
+    .sem-produtos {
+      grid-column: 1 / -1;
+      text-align: center;
+      font-size: 20px;
+      color: #555;
+      padding: 40px;
+      background: transparent;
+      user-select: none;
+      white-space: pre-line; /* para respeitar \n se usar */
+    }
   </style>
 </head>
 <body>
@@ -84,74 +96,89 @@
 <header>
     <div class="logo">Garrafario</div>
     <div class="menu">
-      <a href="historico.html" class="botao" id="btnMeusPedidos" style="display: none;">📄 Meus Pedidos</a>
-      <a href="carrinho.html" class="botao" id="btnCarrinho">🛒 Carrinho</a>
-      <a href="fornecedor.html" class="botao" id="btnMeusProdutos" style="display: none;">📦 Meus Produtos</a>
-      <a href="paginaLogin.html" class="botao" id="btnLogin">👤 Fazer Login</a>
+
+      <!-- PERFIL (link dinâmico dependendo do tipo) -->
+      <a href="#" class="botao" id="btnPerfil" style="display: none;">Perfil</a>
+
+      <!-- Carrinho -->
+      <a href="carrinho.html" class="botao" id="btnCarrinho">Carrinho</a>
+
+      <!-- Login -->
+      <a href="paginaLogin.html" class="botao" id="btnLogin">Fazer Login</a>
+
+      <!-- Saudação -->
       <span id="msgOla" style="color: white; font-weight: bold; margin-left: 15px; display: none;"></span>
-      <a href="#" class="botao" onclick="logout()" id="btnSair" style="display: none;">🚪 Sair</a>
+
+      <!-- Sair removido do header -->
     </div>
   </header>
 
-  <div class="container" id="listaProdutos">
-    </div>
+  <div class="container" id="listaProdutos"></div>
 
-  <script> 
+  <script>
+    // Atualiza menu com base no usuário logado
     function atualizarMenu() {
       const usuarioLogado = JSON.parse(localStorage.getItem(LS_KEYS.LOGGED_USER));
+
       const btnLogin = document.getElementById("btnLogin");
-      const btnSair = document.getElementById("btnSair");
-      const msgOla = document.getElementById("msgOla");
-      // Botões específicos
-      const btnMeusPedidos = document.getElementById("btnMeusPedidos");
+      const btnPerfil = document.getElementById("btnPerfil");
       const btnCarrinho = document.getElementById("btnCarrinho");
-      const btnMeusProdutos = document.getElementById("btnMeusProdutos");
+      const msgOla       = document.getElementById("msgOla");
 
-      if (usuarioLogado) { //LOGADO
-        btnLogin.style.display = "none";       // Esconde login
-        btnSair.style.display = "inline-block"; // Mostra Sair
-        msgOla.innerText = `Olá, ${usuarioLogado.nome} (${usuarioLogado.tipo})`; 
+      if (usuarioLogado) {
+        btnLogin.style.display = "none";
+        msgOla.innerText = `Olá, ${usuarioLogado.nome}`;
         msgOla.style.display = "inline-block";
-        if (usuarioLogado.tipo === 'fornecedor') {//verificar fornecedor ou cliente?
-            //Fornecedor:
-            btnMeusProdutos.style.display = "inline-block"; 
-            btnCarrinho.style.display = "none";    // Esconde carrinho
-            btnMeusPedidos.style.display = "none"; // Esconde pedidos
-        } else {
-            //Cliente
-            btnMeusProdutos.style.display = "none"; // Esconde produtos
-            btnCarrinho.style.display = "inline-block"; // Mostra carrinho
-            btnMeusPedidos.style.display = "inline-block"; // Mostra pedidos
-        }
 
-      } else {//NÃO logado
+        // Mostra botão Perfil e define o destino
+        btnPerfil.style.display = "inline-block";
+        btnPerfil.href = usuarioLogado.tipo === "fornecedor"
+            ? "perfilFornecedor.html"
+            : "perfilCliente.html";
+
+        // Carrinho: escondido para fornecedor
+        btnCarrinho.style.display = usuarioLogado.tipo === "fornecedor"
+            ? "none"
+            : "inline-block";
+
+      } else {
+        // não logado
         btnLogin.style.display = "inline-block";
-        btnCarrinho.style.display = "inline-block"; // Visitante pode ver o carrinho
-        btnSair.style.display = "none";
+        btnCarrinho.style.display = "inline-block";
         msgOla.style.display = "none";
-        btnMeusPedidos.style.display = "none";
-        btnMeusProdutos.style.display = "none";
+        btnPerfil.style.display = "none";
       }
     }
+
     atualizarMenu();
 
-    // Carregar produtos (Refatorado para data.js)
+    // Função atualizada: exibe mensagem quando não há produtos
     function carregarProdutos() {
-      // Usa getProducts() do data.js
-      const produtos = getProducts();
-
+      const produtos = Array.isArray(getProducts) ? getProducts() : [];
       const container = document.getElementById("listaProdutos");
-      container.innerHTML = ""; // limpa antes de exibir
+      container.innerHTML = "";
 
+      // Se não houver produtos cadastrados, exibe mensagem centralizada
+      if (!produtos || produtos.length === 0) {
+        container.innerHTML = `
+          <div class="sem-produtos">sem produtos :( \npor enquanto</div>
+        `;
+        return;
+      }
+
+      // Se houver produtos, renderiza normalmente
       produtos.forEach(produto => {
         const item = document.createElement("div");
         item.classList.add("produto");
 
+        // Segurança: garante que preço seja numérico
+        const preco = produto.preco !== undefined ? Number(produto.preco) : 0;
+
         item.innerHTML = `
-          <img src="${produto.imagem}" alt="${produto.nome}">
-          <h2>${produto.nome}</h2>
-          <p>${produto.descricao}</p>
-          <p><strong>R$ ${produto.preco.toFixed(2)}</strong></p>
+          <img src="${produto.imagem || ''}" alt="${produto.nome || 'Produto'}">
+          <h2>${produto.nome || 'Produto Sem Nome'}</h2>
+          <p>${produto.descricao || ''}</p>
+          <p><strong>R$ ${preco.toFixed(2)}</strong></p>
           <button onclick="adicionarCarrinho(${produto.id})">Adicionar ao Carrinho</button>
         `;
 
@@ -159,32 +186,37 @@
       });
     }
 
-    // Adicionar produto ao carrinho (salvo no localStorage)
+    // Função carrinho (usa getCart/saveCart de data.js)
     function adicionarCarrinho(idProduto) {
-      let carrinho = getCart(); // Usa getCart() do data.js
+      // Se getCart não existir, inicializa carrinho vazio
+      let carrinho = typeof getCart === 'function' ? getCart() : [];
+      if (!Array.isArray(carrinho)) carrinho = [];
 
-      // Encontra se o produto já está no carrinho
       const itemExistente = carrinho.find(item => item.id === idProduto);
       
       if (itemExistente) {
-          itemExistente.quantidade++;
+        itemExistente.quantidade++;
       } else {
-          // Salva o ID e a quantidade
-          carrinho.push({ id: idProduto, quantidade: 1 });
+        carrinho.push({ id: idProduto, quantidade: 1 });
       }
 
-      saveCart(carrinho); // Usa saveCart() do data.js
+      if (typeof saveCart === 'function') {
+        saveCart(carrinho);
+      } else {
+        localStorage.setItem('garrafario_cart', JSON.stringify(carrinho));
+      }
 
       alert("Produto adicionado ao carrinho!");
     }
-    
+
+    // Logout (mantido por compatibilidade; o botão Sair foi removido do header)
     function logout() {
         localStorage.removeItem(LS_KEYS.LOGGED_USER);
         alert("Você saiu da sua conta.");
-        window.location.reload(); // Recarrega a página
+        window.location.reload();
     }
 
-    // Carrega tudo quando abrir a página
+    // Carrega produtos ao abrir a página
     carregarProdutos();
   </script>
 

@@ -5,7 +5,6 @@
 <title>Painel do Fornecedor - Garrafario</title>
 
 <style>
-    /* ... Estilos CSS ... (Mantidos) */
     body {
         margin: 0;
         font-family: Arial, sans-serif;
@@ -42,6 +41,32 @@
 
     h2 {
         color: #333;
+    }
+
+    .profile-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .profile-top .saudacao {
+      font-size: 1.1em;
+      font-weight: bold;
+    }
+
+    .btn-sair {
+      background-color: #c0392b;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .btn-sair:hover {
+      background-color: #a93226;
     }
 
     .form-box {
@@ -98,14 +123,30 @@
         height: 90px;
         object-fit: cover;
         border-radius: 5px;
+        margin-left: 15px;
     }
 
     .delete-btn {
         background-color: #c0392b;
+        color: white;
+        border: none;
+        padding: 8px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-left: 12px;
     }
 
     .delete-btn:hover {
         background-color: #a33025;
+    }
+
+    a.voltar {
+      color: white;
+      text-decoration: none;
+      background: #34495e;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-weight: bold;
     }
 </style>
 </head>
@@ -115,20 +156,28 @@
     <script src="fornecedor_perfil.js"></script>
 
 <header>
-    <div class="logo">Garrafario - Fornecedor</div>
+    <div class="logo">Garrafario</div>
     <div class="menu">
-        <a href="catalogo.html">⬅ Voltar ao Catálogo</a>
+        <a href="catalogo.html" class="voltar">⬅ Voltar ao Catálogo</a>
     </div>
 </header>
 
 <div class="container">
+
+    <!-- Topo do perfil com saudação e botão Sair -->
+    <div class="profile-top">
+      <div class="saudacao" id="saudacaoUsuario" style="display:none;">Olá, Fornecedor</div>
+      <div>
+        <button id="btnSairPerfil" class="btn-sair" style="display:none;">Sair</button>
+      </div>
+    </div>
 
     <h2>Cadastrar Novo Produto</h2>
 
     <div class="form-box">
         <input type="text" id="nome" placeholder="Nome do Produto">
         <textarea id="descricao" rows="3" placeholder="Descrição"></textarea>
-        <input type="number" id="preco" placeholder="Preço (Ex: 49.90)">
+        <input type="number" id="preco" placeholder="Preço (Ex: 49.90)" step="0.01" min="0">
         <input type="text" id="imagem" placeholder="URL da Imagem">
 
         <button onclick="cadastrarProduto()">Cadastrar Produto</button>
@@ -140,19 +189,45 @@
 </div>
 
 <script>
+    // Validação inicial de acesso
     const usuarioLogado = JSON.parse(localStorage.getItem(LS_KEYS.LOGGED_USER));
     if (!usuarioLogado || usuarioLogado.tipo !== "fornecedor") {
         alert("Acesso negado!");
         window.location.href = "paginaLogin.html";
     }
 
+    // Mostrar saudação e botão Sair no topo do perfil
+    (function inicializarPerfilTop() {
+      const saudacao = document.getElementById("saudacaoUsuario");
+      const btnSairPerfil = document.getElementById("btnSairPerfil");
+
+      if (usuarioLogado && usuarioLogado.tipo === 'fornecedor') {
+        saudacao.innerText = `Olá, ${usuarioLogado.nome}`;
+        saudacao.style.display = "inline-block";
+        btnSairPerfil.style.display = "inline-block";
+        btnSairPerfil.addEventListener('click', logout);
+      }
+    })();
+
+    // Função de logout (se já existir em arquivo compartilhado, mantenha centralizada)
+    function logout() {
+      localStorage.removeItem(LS_KEYS.LOGGED_USER);
+      alert("Você saiu da sua conta.");
+      window.location.href = "catalogo.html";
+    }
+
     const fornecedor = new FornecedorPerfil(usuarioLogado.id);
 
     function carregarProdutos() {
-        const produtos = fornecedor.listarMeusProdutos(); 
+        const produtos = fornecedor.listarMeusProdutos();
 
         const lista = document.getElementById("lista-produtos");
         lista.innerHTML = "";
+
+        if (!produtos || produtos.length === 0) {
+            lista.innerHTML = `<div class="form-box"><p>Você ainda não cadastrou produtos.</p></div>`;
+            return;
+        }
 
         produtos.forEach(p => {
             lista.innerHTML += `
@@ -162,18 +237,20 @@
                         <p>${p.descricao}</p>
                         <p><strong>R$ ${Number(p.preco).toFixed(2)}</strong></p>
                     </div>
-                    <img src="${p.imagem}" class="produto-img">
-                    <button class="delete-btn" onclick="deletarProduto(${p.id})">Excluir</button>
+                    <img src="${p.imagem}" class="produto-img" alt="${p.nome}">
+                    <div>
+                      <button class="delete-btn" onclick="deletarProduto(${p.id})">Excluir</button>
+                    </div>
                 </div>
             `;
         });
     }
 
     function cadastrarProduto() {
-        const nome = document.getElementById("nome").value;
-        const descricao = document.getElementById("descricao").value;
+        const nome = document.getElementById("nome").value.trim();
+        const descricao = document.getElementById("descricao").value.trim();
         const preco = document.getElementById("preco").value;
-        const imagem = document.getElementById("imagem").value;
+        const imagem = document.getElementById("imagem").value.trim();
 
         if (!nome || !preco || !imagem) {
              alert("Preencha os campos obrigatórios.");
@@ -198,7 +275,7 @@
             fornecedor.deletarProdutoSeguro(id);
             carregarProdutos();
         } catch (erro) {
-            alert(erro.message);
+            alert(erro.message || "Erro ao excluir produto.");
         }
     }
 
