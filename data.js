@@ -119,33 +119,6 @@ function clearCart() {
     localStorage.removeItem(LS_KEYS.CART);
 }
 
-// Mudanças adicionas por Mirian
-class ClientePerfil {
-    constructor(userId) {
-        this.id = userId;
-    }
-
-    realizarCompra(carrinho, totalTexto) {
-        if (!localStorage.getItem('LSDATA_ORDERS')) {
-            localStorage.setItem('LSDATA_ORDERS', JSON.stringify([]));
-        }
-
-        const pedidos = JSON.parse(localStorage.getItem('LSDATA_ORDERS')) || [];
-        
-        const novoPedido = {
-            id: Date.now(),
-            clienteId: this.id,
-            itens: carrinho,
-            total: totalTexto,
-            data: new Date().toLocaleDateString('pt-BR')
-        };
-
-        pedidos.push(novoPedido);
-        localStorage.setItem('LSDATA_ORDERS', JSON.stringify(pedidos));
-        console.log("Pedido salvo:", novoPedido);
-    }
-}
-
 class FornecedorPerfil {
     constructor(userId) {
         this.id = userId;
