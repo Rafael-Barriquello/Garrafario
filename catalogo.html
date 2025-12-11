@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Garrafario - Catálogo</title>
   <style>
+    
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -91,6 +92,7 @@
   </style>
 </head>
 <body>
+    <!-- data.js deve estar presente e carregado antes deste script -->
     <script src="data.js"></script>
 
 <header>
@@ -109,7 +111,6 @@
       <!-- Saudação -->
       <span id="msgOla" style="color: white; font-weight: bold; margin-left: 15px; display: none;"></span>
 
-      <!-- Sair removido do header -->
     </div>
   </header>
 
@@ -152,9 +153,10 @@
 
     atualizarMenu();
 
-    // Função atualizada: exibe mensagem quando não há produtos
+    // Carregar produtos
     function carregarProdutos() {
-      const produtos = Array.isArray(getProducts) ? getProducts() : [];
+      // getProducts vem de data.js
+      const produtos = typeof getProducts === 'function' ? getProducts() : [];
       const container = document.getElementById("listaProdutos");
       container.innerHTML = "";
 
@@ -174,12 +176,17 @@
         // Segurança: garante que preço seja numérico
         const preco = produto.preco !== undefined ? Number(produto.preco) : 0;
 
+        // Proteções básicas de conteúdo
+        const imagem = produto.imagem || '';
+        const nome = produto.nome || 'Produto Sem Nome';
+        const descricao = produto.descricao || '';
+
         item.innerHTML = `
-          <img src="${produto.imagem || ''}" alt="${produto.nome || 'Produto'}">
-          <h2>${produto.nome || 'Produto Sem Nome'}</h2>
-          <p>${produto.descricao || ''}</p>
+          <img src="${imagem}" alt="${nome}">
+          <h2>${nome}</h2>
+          <p>${descricao}</p>
           <p><strong>R$ ${preco.toFixed(2)}</strong></p>
-          <button onclick="adicionarCarrinho(${produto.id})">Adicionar ao Carrinho</button>
+          <button class="btn-add-cart" onclick="adicionarCarrinho(${produto.id})">Adicionar ao Carrinho</button>
         `;
 
         container.appendChild(item);
@@ -203,7 +210,7 @@
       if (typeof saveCart === 'function') {
         saveCart(carrinho);
       } else {
-        localStorage.setItem('garrafario_cart', JSON.stringify(carrinho));
+        localStorage.setItem(LS_KEYS.CART, JSON.stringify(carrinho));
       }
 
       alert("Produto adicionado ao carrinho!");
@@ -216,8 +223,59 @@
         window.location.reload();
     }
 
+    // Atualiza catálogo quando o LocalStorage for alterado (outra aba)
+    window.addEventListener('storage', function(event) {
+      if (!event) return;
+      // detecta mudança na chave de produtos
+      if (event.key === LS_KEYS.PRODUCTS || event.key === null) {
+        carregarProdutos();
+        removeAddButtonsForFornecedor(); // atualiza visibilidade dos botões
+      }
+    });
+
+    // Recarrega catálogo quando a aba volta a ficar visível (útil ao retornar do perfil)
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') {
+        carregarProdutos();
+        atualizarMenu();
+        removeAddButtonsForFornecedor();
+      }
+    });
+
+    // Também recarrega ao ganhar foco (alguns navegadores/fluxos)
+    window.addEventListener('focus', function() {
+      carregarProdutos();
+      atualizarMenu();
+      removeAddButtonsForFornecedor();
+    });
+
     // Carrega produtos ao abrir a página
     carregarProdutos();
+
+    // ---------------------------
+    // Remover botão adicionar ao carrinho para fornecedores
+    // ---------------------------
+    function removeAddButtonsForFornecedor() {
+      try {
+        const usuarioLogado = JSON.parse(localStorage.getItem(LS_KEYS.LOGGED_USER));
+        if (usuarioLogado && usuarioLogado.tipo === 'fornecedor') {
+          document.querySelectorAll('.btn-add-cart').forEach(btn => btn.remove());
+        }
+      } catch (e) {
+        // falha silenciosa (ex.: LS_KEYS não definido); não interrompe a página
+        console.warn('removeAddButtonsForFornecedor:', e);
+      }
+    }
+
+    // Observe mudanças na lista de produtos para garantir remoção imediata
+    const produtoContainer = document.getElementById('listaProdutos');
+    const observer = new MutationObserver(() => {
+      removeAddButtonsForFornecedor();
+    });
+    observer.observe(produtoContainer, { childList: true, subtree: true });
+
+    // Execução inicial de remoção se necessário
+    removeAddButtonsForFornecedor();
   </script>
 
 </body>
