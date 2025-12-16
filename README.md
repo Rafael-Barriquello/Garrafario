@@ -1,5 +1,5 @@
 # Sistema de Catálogo, Compra e Gerenciamento de Produtos  
-Projeto de Engenharia de Software
+Projeto de final da materia de Engenharia de Software
 
 ## 1. Visão Geral
 
@@ -112,6 +112,18 @@ Ferramentas adicionais utilizadas durante o desenvolvimento:
 - Perfis:
   - **Cliente**: pode alterar dados, ver histórico e comprar.  
   - **Fornecedor**: pode cadastrar, listar e excluir produtos próprios.
+
+### Usuários de Teste 
+
+#### Cliente
+- Email: `cliente@teste.com`
+- Senha: `123`
+
+#### Fornecedor
+- Email: `fornecedor@teste.com`
+- Senha: `123`
+
+Esses usuários podem ser utilizados para testar todas as funcionalidades do sistema.
 
 ---
 
