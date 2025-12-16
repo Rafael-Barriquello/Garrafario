@@ -23,11 +23,26 @@ function initializeData() {
     }
     
     if (!localStorage.getItem(LS_KEYS.PRODUCTS)) {
-        console.log("Inicializando dados de produtos...");
-        const initialProducts = [
-            { id: 101, nome: "Garrafa Térmica 1L", descricao: "Aço inoxidável, mantém 12h quente.", preco: 79.90, imagem: "https://via.placeholder.com/200/27ae60/ffffff?text=Termica+1L", fornecedor_id: 2 },
-            { id: 102, nome: "Squeeze Esportivo", descricao: "750ml, livre de BPA, bico prático.", preco: 29.50, imagem: "https://via.placeholder.com/200/3498db/ffffff?text=Squeeze+750ml", fornecedor_id: 2 }
-        ];
+        console.log("Inicializando dados de produtos..."); // As imagens de exemplo dos produtos que não carregavam foram corrigidas
+        const initialProducts = [                          // Agora são carregados a partir da pasta "imagens" do projeto,
+    {                                                      
+        id: 101,
+        nome: "Garrafa Térmica 1L",
+        descricao: "Aço inoxidável, mantém 12h quente.",
+        preco: 79.90,
+        imagem: "imagens/Garrafa-Termica-Inox-Pressao-Lumina-1-litro-–-Termolar.webp",
+        fornecedor_id: 2
+    },
+    {
+        id: 102,
+        nome: "Squeeze Esportivo",
+        descricao: "750ml, livre de BPA, bico prático.",
+        preco: 29.50,
+        imagem: "imagens/UTI01240009_01.webp",
+        fornecedor_id: 2
+    }
+];
+
         localStorage.setItem(LS_KEYS.PRODUCTS, JSON.stringify(initialProducts));
         localStorage.setItem(LS_KEYS.NEXT_PRODUCT_ID, 103);
     }

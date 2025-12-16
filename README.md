@@ -1,5 +1,5 @@
 # Sistema de Catálogo, Compra e Gerenciamento de Produtos  
-Projeto de Engenharia de Software
+Projeto de final da materia de Engenharia de Software
 
 ## 1. Visão Geral
 
