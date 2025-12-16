@@ -137,22 +137,39 @@
 
     // Carregar produtos (Refatorado para data.js)
     function carregarProdutos() {
-      // Usa getProducts() do data.js
-      const produtos = getProducts();
+      // 1. Obtém o usuário logado para verificar o tipo
+      let usuarioLogado = null;
+      if (typeof LS_KEYS !== 'undefined') {
+          usuarioLogado = JSON.parse(localStorage.getItem(LS_KEYS.LOGGED_USER));
+      }
+      
+      const ehFornecedor = usuarioLogado && usuarioLogado.tipo === 'fornecedor';
 
+      // Segurança caso getProducts não exista
+      if (typeof getProducts !== 'function') return;
+
+      let produtos = getProducts();
       const container = document.getElementById("listaProdutos");
-      container.innerHTML = ""; // limpa antes de exibir
+      container.innerHTML = ""; 
 
       produtos.forEach(produto => {
         const item = document.createElement("div");
         item.classList.add("produto");
 
+        // 2. Define o HTML do botão.
+        let botaoHtml = `<button onclick="adicionarCarrinho(${produto.id})">Adicionar ao Carrinho</button>`;
+        
+        if (ehFornecedor) {
+            botaoHtml = ""; // Remove o botão se for fornecedor
+        }
+
+        // CORREÇÃO AQUI: Usar a variável ${botaoHtml} em vez de escrever o <button> fixo
         item.innerHTML = `
           <img src="${produto.imagem}" alt="${produto.nome}">
           <h2>${produto.nome}</h2>
           <p>${produto.descricao}</p>
           <p><strong>R$ ${produto.preco.toFixed(2)}</strong></p>
-          <button onclick="adicionarCarrinho(${produto.id})">Adicionar ao Carrinho</button>
+          ${botaoHtml} 
         `;
 
         container.appendChild(item);
