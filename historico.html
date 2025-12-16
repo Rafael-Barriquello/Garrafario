@@ -37,55 +37,97 @@
       margin: 30px auto;
     }
 
+    h2 {
+      color: #333;
+      border-bottom: 2px solid #27ae60;
+      padding-bottom: 10px;
+    }
+
+    /* Card do Pedido */
     .pedido-card {
       background: white;
-      padding: 20px;
       border-radius: 8px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
       margin-bottom: 20px;
-      border-left: 5px solid #27ae60;
+      overflow: hidden;
     }
 
     .pedido-header {
-        display: flex;
-        justify-content: space-between;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 10px;
-        margin-bottom: 10px;
+      background-color: #ecf0f1;
+      padding: 15px;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #2c3e50;
     }
 
-    .pedido-data {
-        color: #7f8c8d;
-        font-size: 0.9em;
+    .pedido-header .data {
+      font-weight: bold;
     }
 
-    .pedido-total {
-        font-size: 1.2em;
-        font-weight: bold;
-        color: #2c3e50;
+    .pedido-header .total {
+      color: #27ae60;
+      font-weight: bold;
+      font-size: 1.1em;
     }
 
-    .lista-itens {
-        list-style: none;
-        padding: 0;
-        margin: 0;
+    .pedido-itens {
+      padding: 15px;
     }
 
-    .lista-itens li {
-        padding: 5px 0;
-        display: flex;
-        justify-content: space-between;
-        color: #555;
+    .item-linha {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
     }
-    
-    .status {
+
+    .item-linha:last-child {
+      border-bottom: none;
+    }
+
+    .item-nome {
+      display: flex;
+      align-items: center;
+    }
+
+    .item-thumb {
+      width: 40px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-right: 15px;
+      background-color: #eee;
+    }
+
+    .status-badge {
+        background-color: #27ae60;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        margin-left: 10px;
+    }
+
+    .btn-voltar {
         display: inline-block;
-        background-color: #e8f5e9;
-        color: #27ae60;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 0.8em;
-        font-weight: bold;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+    .btn-voltar:hover {
+        background-color: #2980b9;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #7f8c8d;
     }
   </style>
 </head>
@@ -102,81 +144,112 @@
   </header>
 
   <div class="container">
-    <h2>Histórico de Compras</h2>
-    <div id="listaHistorico">
+    <h2>Histórico de Pedidos</h2>
+    
+    <div id="listaPedidos">
         </div>
+
+    <div style="text-align: center;">
+        <a href="catalogo.html" class="btn-voltar">Continuar Comprando</a>
+    </div>
   </div>
 
   <script>
-    function carregarHistorico() {
-        const divHistorico = document.getElementById("listaHistorico");
-        const usuarioLogado = JSON.parse(localStorage.getItem(LS_KEYS.LOGGED_USER));
+    // 1. Verificação de Segurança (Apenas Clientes Logados)
+    const usuarioLogado = JSON.parse(localStorage.getItem(LS_KEYS.LOGGED_USER));
 
-        // 1. Verificar se está logado
-        if (!usuarioLogado || usuarioLogado.tipo !== 'cliente') {
-            divHistorico.innerHTML = "<p>Por favor, faça login como cliente para ver seus pedidos.</p>";
+    if (!usuarioLogado || usuarioLogado.tipo !== 'cliente') {
+        alert("Você precisa estar logado como cliente para ver seus pedidos.");
+        window.location.href = "paginaLogin.html";
+    }
+
+    // 2. Função para carregar histórico
+    function carregarHistorico() {
+        const container = document.getElementById("listaPedidos");
+        container.innerHTML = "";
+
+        // Tenta pegar do localStorage diretamente para garantir, 
+        // caso a classe ClientePerfil tenha sido sobrescrita no data.js
+        let pedidos = JSON.parse(localStorage.getItem('LSDATA_ORDERS')) || [];
+
+        // Filtra apenas os pedidos deste usuário
+        const meusPedidos = pedidos.filter(p => p.clienteId === usuarioLogado.id);
+
+        // Ordena do mais recente para o mais antigo
+        // Se a data for string ISO, new Date funciona. Se for dd/mm/aaaa, precisa tratar, 
+        // mas como o id é timestamp, podemos ordenar pelo ID descrescente.
+        meusPedidos.sort((a, b) => b.id - a.id);
+
+        if (meusPedidos.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <h3>Você ainda não fez nenhum pedido.</h3>
+                    <p>Que tal dar uma olhada no nosso catálogo?</p>
+                </div>
+            `;
             return;
         }
 
-        // 2. Instanciar a classe e buscar dados
-        try {
-            const cliente = new ClientePerfil(usuarioLogado.id);
-            const pedidos = cliente.getHistoricoCompras();
+        meusPedidos.forEach(pedido => {
+            let htmlItens = "";
 
-            if (pedidos.length === 0) {
-                divHistorico.innerHTML = "<p>Você ainda não realizou nenhuma compra.</p>";
-                return;
-            }
-
-            // 3. Renderizar cada pedido
-            divHistorico.innerHTML = ""; 
-            
-            pedidos.forEach(pedido => {
-                // Formatar data (ex: 10/12/2025 às 14:30)
-                const dataObj = new Date(pedido.data);
-                const dataFormatada = dataObj.toLocaleDateString('pt-BR') + ' às ' + dataObj.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
-
-                // Montar lista de itens HTML
-                let itensHtml = '';
-                pedido.itens.forEach(item => {
-                    // Busca nome do produto pelo ID para garantir que mostre o nome certo
-                    const prodInfo = getProductById(item.id); 
-                    const nomeProduto = prodInfo ? prodInfo.nome : "Produto Indisponível";
-                    
-                    itensHtml += `
-                        <li>
-                            <span>${item.quantidade}x ${nomeProduto}</span>
-                        </li>
-                    `;
-                });
-
-                // Criar o card do pedido
-                const card = `
-                    <div class="pedido-card">
-                        <div class="pedido-header">
-                            <div>
-                                <div class="pedido-data">Pedido #${pedido.id} • ${dataFormatada}</div>
-                                <div style="margin-top:5px;"><span class="status">${pedido.status}</span></div>
-                            </div>
-                            <div class="pedido-total">${pedido.total}</div>
+            // Itera sobre os itens dentro do pedido
+            pedido.itens.forEach(itemCarrinho => {
+                // Busca detalhes do produto no 'data.js' via ID
+                const produtoDetalhes = getProductById(itemCarrinho.id);
+                
+                // Fallback caso o produto tenha sido deletado do catálogo
+                const nomeProduto = produtoDetalhes ? produtoDetalhes.nome : "Produto Indisponível (Removido)";
+                const imgProduto = produtoDetalhes ? produtoDetalhes.imagem : "";
+                const precoUnitario = produtoDetalhes ? produtoDetalhes.preco : 0;
+                
+                htmlItens += `
+                    <div class="item-linha">
+                        <div class="item-nome">
+                            ${imgProduto ? `<img src="${imgProduto}" class="item-thumb">` : ''}
+                            <span>${itemCarrinho.quantidade}x <strong>${nomeProduto}</strong></span>
                         </div>
-                        <ul class="lista-itens">
-                            ${itensHtml}
-                        </ul>
+                        <div>R$ ${(precoUnitario * itemCarrinho.quantidade).toFixed(2)}</div>
                     </div>
                 `;
-                divHistorico.innerHTML += card;
             });
 
-        } catch (erro) {
-            console.error(erro);
-            divHistorico.innerHTML = "<p>Erro ao carregar perfil. Tente fazer login novamente.</p>";
-        }
+            // Formata a data (se for timestamp ou string ISO)
+            let dataFormatada = pedido.data;
+            // Se for ISO ou timestamp, tenta formatar bonitinho
+            if(pedido.data && (pedido.data.includes('-') || typeof pedido.data === 'number')) {
+                 try {
+                    const dataObj = new Date(pedido.data);
+                    dataFormatada = dataObj.toLocaleDateString('pt-BR') + ' ' + dataObj.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+                 } catch(e) {}
+            }
+
+            // Monta o Card HTML
+            const cardHTML = `
+                <div class="pedido-card">
+                    <div class="pedido-header">
+                        <div>
+                            <span class="data">Pedido #${pedido.id}</span>
+                            <br>
+                            <small style="color: #7f8c8d">${dataFormatada}</small>
+                            <span class="status-badge">Concluído</span>
+                        </div>
+                        <div class="total">${pedido.total}</div>
+                    </div>
+                    <div class="pedido-itens">
+                        ${htmlItens}
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML += cardHTML;
+        });
     }
 
-    // Carregar ao abrir a página
+    // Inicializa
     carregarHistorico();
+
   </script>
 
 </body>
-</html> 
+</html>
